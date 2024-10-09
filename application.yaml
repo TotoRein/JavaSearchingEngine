@@ -18,6 +18,6 @@ indexing-settings:
   sites:
     - url: https://www.playback.ru/
       name: PlayBack.Ru
-    #- url: https://dombulgakova.ru/
-    #  name: Булгаковский дом
+#    - url: https://dombulgakova.ru/
+#      name: Булгаковский дом
 

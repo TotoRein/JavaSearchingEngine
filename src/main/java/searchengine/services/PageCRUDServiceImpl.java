@@ -1,6 +1,7 @@
 package searchengine.services;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import searchengine.dto.index.PageDto;
@@ -30,12 +31,17 @@ public class PageCRUDServiceImpl implements CRUDService<PageDto> {
 
     @Override
     public PageDto getById(int id) {
-        return null;
+        try {
+            Page page = pageRepository.findById(id).orElseThrow(ChangeSetPersister.NotFoundException::new);
+            return mapToDto(page);
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     @Override
     public Collection<PageDto> getAll() {
-        return null;
+        return pageRepository.findAll().stream().map(PageCRUDServiceImpl::mapToDto).toList();
     }
 
     @Override
@@ -47,12 +53,22 @@ public class PageCRUDServiceImpl implements CRUDService<PageDto> {
     }
 
     @Override
-    public ResponseEntity<?> update(PageDto item) {
-        return null;
+    public ResponseEntity<?> update(PageDto pageDto) {
+        Page page = pageRepository.save(mapToEntity(pageDto));
+        return ResponseEntity.ok(mapToDto(page));
     }
 
     @Override
     public ResponseEntity<?> deleteById(int id) {
-        return null;
+        pageRepository.deleteById(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    public PageDto findBySiteIdAndPath(int siteId, String path) {
+        return pageRepository.findBySiteIdAndPath(siteId, path).map(PageCRUDServiceImpl::mapToDto).orElse(null);
+    }
+
+    public boolean isPageInIndex(int siteId, String path) {
+        return pageRepository.findBySiteIdAndPath(siteId, path).isPresent();
     }
 }

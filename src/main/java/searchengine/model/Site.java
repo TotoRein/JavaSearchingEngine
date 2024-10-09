@@ -45,4 +45,9 @@ public class Site {
         this.url = url;
         this.name = name;
     }
+
+    public void updateStatus(Status status) {
+        setStatus(status);
+        setStatusTime(new Date());
+    }
 }
