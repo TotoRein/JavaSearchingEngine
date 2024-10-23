@@ -15,6 +15,7 @@ import searchengine.repositories.SiteRepository;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.Set;
 import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 
@@ -32,7 +33,7 @@ public class IndexingServiceImpl implements IndexingService {
         /**
          * Найти сайт
          * Если индексируется -> сообщение и конец
-         * Если Индексирован / фейлед - удалить и начать индексацию
+         * Если Индексирован / ошибка - удалить и начать индексацию
          * */
         Integer result = 0;
         for (searchengine.config.Site site : sitesList.getSites()) {
@@ -41,7 +42,7 @@ public class IndexingServiceImpl implements IndexingService {
             if (currentSite != null) {
                 /* ...уже индексируется */
                 if (currentSite.getStatus().equals(Status.INDEXING)) {
-                    return new IndexingResponse(false, "Сайт + "+ currentSite.getUrl() + " уже индексируется!");
+                    return new IndexingResponse(false, "Сайт "+ currentSite.getUrl() + " уже индексируется!");
                 }
                 /* ...не индексируется */
                 siteRepository.delete(currentSite);
@@ -52,9 +53,10 @@ public class IndexingServiceImpl implements IndexingService {
             siteEntity.updateStatus(Status.INDEXING);
             siteEntity = siteRepository.save(siteEntity);
             siteRepository.flush();
-
+            int siteId = siteEntity.getId();
             /** todo: Как инициализировать pageCRUD и repository через autowired, а не передавать в каждый поток? */
-            indexingThreadsPool.invoke(new SiteIndexer(site.getUrl(), site.getUrl(), siteEntity.getId(), pageCRUDService, siteRepository));
+            new Thread(() -> indexingThreadsPool.invoke(new SiteIndexer(site.getUrl(), site.getUrl(), siteId, pageCRUDService, siteRepository))).start();
+            //indexingThreadsPool.invoke(new SiteIndexer(site.getUrl(), site.getUrl(), siteEntity.getId(), pageCRUDService, siteRepository));
         }
 
         return new IndexingResponse(true, null);

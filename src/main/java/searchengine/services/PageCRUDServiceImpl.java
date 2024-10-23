@@ -1,6 +1,7 @@
 package searchengine.services;
 
 import lombok.RequiredArgsConstructor;
+import org.hibernate.NonUniqueResultException;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -8,6 +9,7 @@ import searchengine.dto.index.PageDto;
 import searchengine.model.Page;
 import searchengine.repositories.PageRepository;
 
+import javax.transaction.Transactional;
 import java.util.Collection;
 
 @Service
@@ -45,10 +47,15 @@ public class PageCRUDServiceImpl implements CRUDService<PageDto> {
     }
 
     @Override
+    @Transactional(rollbackOn = NonUniqueResultException.class)
     public PageDto create(PageDto pageDto) {
+        if (isPageInIndex(pageDto.getSiteId(), pageDto.getPath())) {
+            return null;
+        }
+
         Page page = mapToEntity(pageDto);
         page.setSite(SiteCRUDServiceImpl.mapToEntity(siteCRUDService.getById(pageDto.getSiteId())));
-        page = pageRepository.save(page);
+        page = pageRepository.saveAndFlush(page);
         return mapToDto(page);
     }
 
@@ -62,10 +69,6 @@ public class PageCRUDServiceImpl implements CRUDService<PageDto> {
     public ResponseEntity<?> deleteById(int id) {
         pageRepository.deleteById(id);
         return ResponseEntity.noContent().build();
-    }
-
-    public PageDto findBySiteIdAndPath(int siteId, String path) {
-        return pageRepository.findBySiteIdAndPath(siteId, path).map(PageCRUDServiceImpl::mapToDto).orElse(null);
     }
 
     public boolean isPageInIndex(int siteId, String path) {

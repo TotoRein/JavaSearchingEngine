@@ -48,7 +48,6 @@ public class SiteCRUDServiceImpl implements CRUDService<SiteDto> {
     @Override
     public SiteDto getById(int id) {
         try {
-            log.info("Search for id:" + id);
             return mapToDto(repository.findById(id).orElseThrow());
         } catch (Exception ex) {
             ex.printStackTrace();

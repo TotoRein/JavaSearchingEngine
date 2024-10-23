@@ -38,7 +38,8 @@ public class SiteIndexer extends RecursiveTask<Integer> {
     protected Integer compute() {
         Integer quantity = 1;
         try {
-            Thread.sleep(100);
+            int delay = (int) (200 + Math.random() * 200);
+            Thread.sleep(delay);
         } catch (InterruptedException e) {
             throw new RuntimeException(e);
         }
@@ -46,7 +47,12 @@ public class SiteIndexer extends RecursiveTask<Integer> {
         Document doc;
         Connection.Response response;
         try {
-            response = Jsoup.connect(currentPageUrl).ignoreContentType(true).execute();
+            response = Jsoup.connect(currentPageUrl)
+                    .userAgent("Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6")
+                    .referrer("http://www.google.com")
+                    .ignoreContentType(true)
+                    .ignoreHttpErrors(true)
+                    .execute();
             doc = response.parse();
         } catch (IOException e) {
             log.error(e.getMessage());
@@ -72,7 +78,9 @@ public class SiteIndexer extends RecursiveTask<Integer> {
         while (iterator.hasNext()) {
             Element element = iterator.next();
             String href = element.attr("abs:href").toLowerCase();
-            hrefSet.add(checkSlash(href));
+            if (href.length() <= 255) {
+                hrefSet.add(href);
+            }
         }
         for (String href : hrefSet) {
             if (href.contains(rootSiteUrl) & !href.contains("#")) {
@@ -84,13 +92,13 @@ public class SiteIndexer extends RecursiveTask<Integer> {
             }
         }
 
+        for (SiteIndexer walker : walkers) {
+            quantity += walker.join();
+        }
+
         // В корневом потоке сайта/страницы ждём завершения всех прочих потоков
         if (currentPageUrl.equals(rootSiteUrl)) {
-            for (SiteIndexer walker : walkers) {
-                quantity += walker.join();
-            }
-            log.info("Проиндексировано " + quantity + " сайтов");
-
+            log.info("Проиндексировано страниц: " + quantity);
             siteRepository.setIndexedStatusById(rootSiteId, new Date());
         }
         return quantity;
@@ -107,14 +115,14 @@ public class SiteIndexer extends RecursiveTask<Integer> {
     }
 
     /**
-     * Добавляет символ "/" в конец строки, если его нет
+     * Добавляет символ "/" в начало строки, если его нет
      *
      *
      * @param baseUrl проверяемы url
-     * @return Строка, оканчивающаяся символом "/"
+     * @return Строка, начинающаяся символом "/"
      */
     private String checkSlash(String baseUrl) {
-        return baseUrl.endsWith("/") ? baseUrl : baseUrl.concat("/");
+        return baseUrl.startsWith("/") ? baseUrl : "/".concat(baseUrl);
     }
 
     /**
