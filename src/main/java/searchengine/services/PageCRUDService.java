@@ -1,7 +1,7 @@
 package searchengine.services;
 
 import lombok.RequiredArgsConstructor;
-import org.hibernate.NonUniqueResultException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -9,13 +9,15 @@ import searchengine.dto.index.PageDto;
 import searchengine.model.Page;
 import searchengine.repositories.PageRepository;
 
-import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
-public class PageCRUDServiceImpl implements CRUDService<PageDto> {
-    private final SiteCRUDServiceImpl siteCRUDService;
+public class PageCRUDService implements CRUDService<PageDto> {
+    private final SiteCRUDService siteCRUDService;
     private final PageRepository pageRepository;
 
     public static PageDto mapToDto(Page page) {
@@ -28,7 +30,8 @@ public class PageCRUDServiceImpl implements CRUDService<PageDto> {
                 null,
                 pageDto.getPath(),
                 pageDto.getCode(),
-                pageDto.getContent());
+                pageDto.getContent(),
+                new ArrayList<>());
     }
 
     @Override
@@ -43,20 +46,25 @@ public class PageCRUDServiceImpl implements CRUDService<PageDto> {
 
     @Override
     public Collection<PageDto> getAll() {
-        return pageRepository.findAll().stream().map(PageCRUDServiceImpl::mapToDto).toList();
+        return pageRepository.findAll().stream().map(PageCRUDService::mapToDto).toList();
+    }
+
+    public List<Page> getAllById(List<Integer> ids) {
+        return pageRepository.findAllById(ids);
     }
 
     @Override
-    @Transactional(rollbackOn = NonUniqueResultException.class)
     public PageDto create(PageDto pageDto) {
-        if (isPageInIndex(pageDto.getSiteId(), pageDto.getPath())) {
+        Page page = mapToEntity(pageDto);
+        page.setSite(SiteCRUDService.mapToEntity(siteCRUDService.getById(pageDto.getSiteId())));
+        try {
+            page = pageRepository.saveAndFlush(page);
+            return mapToDto(page);
+        } catch (Exception exception) {
+            log.error("Attempt to insert something wrong! Path: " + page.getPath() + "\n" +
+                    exception.getMessage() + pageDto);
             return null;
         }
-
-        Page page = mapToEntity(pageDto);
-        page.setSite(SiteCRUDServiceImpl.mapToEntity(siteCRUDService.getById(pageDto.getSiteId())));
-        page = pageRepository.saveAndFlush(page);
-        return mapToDto(page);
     }
 
     @Override
@@ -73,5 +81,13 @@ public class PageCRUDServiceImpl implements CRUDService<PageDto> {
 
     public boolean isPageInIndex(int siteId, String path) {
         return pageRepository.findBySiteIdAndPath(siteId, path).isPresent();
+    }
+
+    public Page findBySiteAndPath(int siteId, String path) {
+        return pageRepository.findBySiteIdAndPath(siteId, path).orElse(null);
+    }
+
+    public List<Page> getPagesBySite(int siteId) {
+        return pageRepository.findBySiteId(siteId);
     }
 }

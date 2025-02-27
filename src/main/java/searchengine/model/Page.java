@@ -1,14 +1,14 @@
 package searchengine.model;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
+import javax.persistence.Index;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
-@Table(name = "page", indexes = {@Index(columnList = "path")})
+@Table(name = "page", indexes = {@Index(columnList = "path"), @Index(columnList = "site_id, path", unique = true)})
 @Getter
 @Setter
 @AllArgsConstructor
@@ -18,14 +18,15 @@ public class Page {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private int id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "site_id", nullable = false)
     private Site site;
 
     /** По заданию это поле должно быть TEXT,
      * но SQL не может создавать индекс по слишком длинным полям.
-     * Задать длину индекса через jpa не получилось, изменил на VARCHAR(255) */
-    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
+     * Задать длину индекса через jpa не получилось, изменил на VARCHAR(255)
+     * Иногда возникают ошибки кодировки, в бд поменял на tf8bm4, для создания индекса сокращаю до 180 */
+    @Column(nullable = false, columnDefinition = "VARCHAR(180)")
     private String path;
 
     @Column(nullable = false)
@@ -39,5 +40,15 @@ public class Page {
         this.path = path;
         this.code = code;
         this.content = content;
+    }
+
+    @OneToMany(mappedBy = "page", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<searchengine.model.Index> indexList = new ArrayList<>();
+
+    @Override
+    public String toString() {
+        return "id=" + id + "\n" +
+                "site=" + site.getUrl() + "\n" +
+                "path=" + path;
     }
 }

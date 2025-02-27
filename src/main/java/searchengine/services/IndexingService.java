@@ -7,4 +7,8 @@ public interface IndexingService {
     IndexingResponse startIndexing();
 
     ResponseEntity<?> stopIndexing();
+
+    IndexingResponse indexPage(String url);
+
+
 }

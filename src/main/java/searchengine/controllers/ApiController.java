@@ -1,14 +1,13 @@
 package searchengine.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import searchengine.dto.index.IndexingResponse;
 import searchengine.dto.statistics.StatisticsResponse;
+import searchengine.responseTemplates.ApiResponse;
 import searchengine.services.IndexingService;
+import searchengine.services.SearchService;
 import searchengine.services.StatisticsService;
 
 @RestController
@@ -18,6 +17,7 @@ public class ApiController {
 
     private final StatisticsService statisticsService;
     private final IndexingService indexingService;
+    private final SearchService searchService;
 //
 //    public ApiController(StatisticsService statisticsService, IndexingService indexingService) {
 //        this.statisticsService = statisticsService;
@@ -37,5 +37,19 @@ public class ApiController {
     @GetMapping("/stopIndexing")
     public ResponseEntity<?> stopIndexing() {
         return indexingService.stopIndexing();
+    }
+
+    @PostMapping("/indexPage")
+    public IndexingResponse indexPage(@RequestBody String url) {
+        return indexingService.indexPage(url);
+    }
+
+    @GetMapping("/search")
+    public ApiResponse search(@RequestParam String query,
+                              @RequestParam(defaultValue = "") String site,
+                              @RequestParam(defaultValue = "0") Integer offset,
+                              @RequestParam(defaultValue = "20") Integer limit) {
+
+        return searchService.search(query, site, offset, limit);
     }
 }

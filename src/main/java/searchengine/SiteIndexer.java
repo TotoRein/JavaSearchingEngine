@@ -7,9 +7,13 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import searchengine.dto.index.IndexDto;
+import searchengine.dto.index.LemmaDto;
 import searchengine.dto.index.PageDto;
-import searchengine.repositories.SiteRepository;
-import searchengine.services.PageCRUDServiceImpl;
+import searchengine.services.IndexCRUDService;
+import searchengine.services.LemmaCRUDService;
+import searchengine.services.PageCRUDService;
+import searchengine.services.SiteCRUDService;
 
 import java.io.IOException;
 import java.util.*;
@@ -23,15 +27,26 @@ public class SiteIndexer extends RecursiveTask<Integer> {
     private String currentPageUrl;
 
     /** todo: autowired не сработал, прокидывать каждый раз сервис - трата ресурсов. как исправить? */
-    private final PageCRUDServiceImpl pageCRUDService;
-    private final SiteRepository siteRepository;
+    /** Не сработал, потому что не является бином, а бином сделать recursiveTask нельзя, сделать отдельный класс для конфига */
+    private final PageCRUDService pageCRUDService;
+    private final SiteCRUDService siteCRUDService;
+    private final LemmaCRUDService lemmaCRUDService;
+    private final IndexCRUDService indexCRUDService;
 
-    public SiteIndexer(String url, String root, int rootSiteId, PageCRUDServiceImpl pageCRUDService, SiteRepository siteRepository) {
+    public SiteIndexer(String url,
+                       String root,
+                       int rootSiteId,
+                       PageCRUDService pageCRUDService,
+                       SiteCRUDService siteCRUDService,
+                       LemmaCRUDService lemmaCRUDService,
+                       IndexCRUDService indexCRUDService) {
         this.rootSiteId = rootSiteId;
         rootSiteUrl = root;
         currentPageUrl = url;
         this.pageCRUDService = pageCRUDService;
-        this.siteRepository = siteRepository;
+        this.siteCRUDService = siteCRUDService;
+        this.lemmaCRUDService = lemmaCRUDService;
+        this.indexCRUDService = indexCRUDService;
     }
 
     @Override
@@ -59,16 +74,23 @@ public class SiteIndexer extends RecursiveTask<Integer> {
             return 0;
         }
 
-        // Для создания стартовой страницы обхода сайта
+        /* Если пустой content, пропускаем страницу  */
+        if (doc.data().isEmpty()) {
+            return 0;
+        }
+        PageDto pageDto;
         if (isPageNotIndexed(rootSiteId, currentPageUrl)) {
-            pageCRUDService.create(new PageDto(rootSiteId,
+            pageDto = pageCRUDService.create(new PageDto(rootSiteId,
                 cutRootUrl(currentPageUrl),
                 response.statusCode(),
-                doc.data())
+                doc.html())
             );
         } else {
             return 0;
         }
+
+        /* Обновляем timestamp статуса */
+        siteCRUDService.updateStatusTime(rootSiteId);
 
         Elements links = doc.select("a[href]");
         Iterator<Element> iterator = links.iterator();
@@ -78,28 +100,52 @@ public class SiteIndexer extends RecursiveTask<Integer> {
         while (iterator.hasNext()) {
             Element element = iterator.next();
             String href = element.attr("abs:href").toLowerCase();
-            if (href.length() <= 255) {
-                hrefSet.add(href);
-            }
+            hrefSet.add(href);
         }
+
+        /* Обрабатываем каждую ссылку на странице, запускаем по корректным SiteIndexer в новом потоке */
         for (String href : hrefSet) {
+            href = href.split("\\?")[0];
+            href = href.endsWith("/") ? href.substring(0, href.length() - 1) : href;
             if (href.contains(rootSiteUrl) & !href.contains("#")) {
-                if (isPageNotIndexed(rootSiteId, href))  {
-                    SiteIndexer walker = new SiteIndexer(href, rootSiteUrl, rootSiteId, pageCRUDService, siteRepository);
+                if (isPageNotIndexed(rootSiteId, href)) {
+
+                    /* Проверка корректность ссылок */
+                    // Без бина не подтянуть значение из конфига, а бин создать нельзя
+                    int maxPathLength = 255;
+                    if (href.length() > maxPathLength) {
+                        continue;
+                    }
+                    // Игнорируем картинки
+                    String[] wrongExtensions = {".png", ".jpg", ".jpeg", ".svg", ".gif", ".pdf"};
+                    if (Arrays.stream(wrongExtensions).anyMatch(href::endsWith)) {
+                        continue;
+                    }
+
+                    SiteIndexer walker = new SiteIndexer(href,
+                            rootSiteUrl,
+                            rootSiteId,
+                            pageCRUDService,
+                            siteCRUDService,
+                            lemmaCRUDService,
+                            indexCRUDService);
                     walker.fork();
                     walkers.add(walker);
                 }
             }
         }
 
+        /* Создаём индекс по странице */
+        generateIndexForPage(pageDto);
+
         for (SiteIndexer walker : walkers) {
             quantity += walker.join();
         }
 
-        // В корневом потоке сайта/страницы ждём завершения всех прочих потоков
+        /* В корневом потоке сайта/страницы ждём завершения всех прочих потоков */
         if (currentPageUrl.equals(rootSiteUrl)) {
             log.info("Проиндексировано страниц: " + quantity);
-            siteRepository.setIndexedStatusById(rootSiteId, new Date());
+            siteCRUDService.setIndexedStatusById(rootSiteId, new Date());
         }
         return quantity;
     }
@@ -134,5 +180,35 @@ public class SiteIndexer extends RecursiveTask<Integer> {
      */
     private boolean isPageNotIndexed(int siteId, String path) {
         return !pageCRUDService.isPageInIndex(siteId, checkSlash(cutRootUrl(path)));
+    }
+
+    /**
+     * Получает на вход dto страницы, разбивает content на леммы, записывает их в lemma и frequency
+     */
+    public int generateIndexForPage(PageDto pageDto) {
+        String pageText = pageDto.getContent();
+        LemmaFinder lemmaFinder;
+        try {
+            lemmaFinder = LemmaFinder.getInstance();
+        } catch (IOException exception) {
+            log.error(exception.getMessage());
+            return 0;
+        }
+        Map<String, Integer> lemmasWithFrequencies = lemmaFinder.collectLemmas(pageText);
+
+        for (String lemmaKey : lemmasWithFrequencies.keySet()) {
+            LemmaDto lemmaDto;
+            if (lemmaCRUDService.isLemmaExist(lemmaKey)) {
+                lemmaDto = lemmaCRUDService.getByLemma(lemmaKey);
+                lemmaDto.setFrequency(lemmaDto.getFrequency() + 1);
+                lemmaCRUDService.update(lemmaDto);
+            } else {
+                lemmaDto = new LemmaDto(pageDto.getSiteId(), lemmaKey, 1);
+                lemmaDto = lemmaCRUDService.create(lemmaDto);
+            }
+            IndexDto indexDto = new IndexDto(pageDto.getId(), lemmaDto.getId(), lemmasWithFrequencies.get(lemmaKey));
+            indexCRUDService.create(indexDto);
+        }
+        return 1;
     }
 }

@@ -25,4 +25,9 @@ public interface SiteRepository extends JpaRepository<Site, Integer> {
     @Query("UPDATE Site SET status = 'INDEXED', status_time = ?2 WHERE id = ?1")
     void setIndexedStatusById(int id, Date statusTime);
     Site findByUrl(String url);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Site SET status_time = ?2 WHERE id = ?1")
+    void updateStatusTime(int siteId, Date statusTime);
 }

@@ -2,21 +2,21 @@ package searchengine.services;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import searchengine.dto.index.SiteDto;
 import searchengine.model.Site;
+import searchengine.model.enums.Status;
 import searchengine.repositories.SiteRepository;
-import java.util.Collection;
-import java.util.Date;
-import java.util.List;
-import java.util.NoSuchElementException;
+
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class SiteCRUDServiceImpl implements CRUDService<SiteDto> {
+public class SiteCRUDService implements CRUDService<SiteDto> {
     private final SiteRepository repository;
 
     public static SiteDto mapToDto(Site site) {
@@ -27,8 +27,7 @@ public class SiteCRUDServiceImpl implements CRUDService<SiteDto> {
                 site.getLastError(),
                 site.getUrl(),
                 site.getName(),
-                /** todo: список стриниц передавать тоже */
-                List.of()//site.getPages().stream().map(PageCRUDServiceImpl::mapToDto).toList()
+                new ArrayList<>()
         );
     }
 
@@ -40,30 +39,35 @@ public class SiteCRUDServiceImpl implements CRUDService<SiteDto> {
                 siteDto.getLastError(),
                 siteDto.getUrl(),
                 siteDto.getName(),
-                siteDto.getPages().stream().map(PageCRUDServiceImpl::mapToEntity).toList()
+                siteDto.getPages().stream().map(PageCRUDService::mapToEntity).toList()
         );
     }
 
-    /** todo: сделать нормальный формат возвращаемого значения*/
     @Override
     public SiteDto getById(int id) {
         try {
-            return mapToDto(repository.findById(id).orElseThrow());
-        } catch (Exception ex) {
-            ex.printStackTrace();
+            return mapToDto(repository.findById(id).orElseThrow(ChangeSetPersister.NotFoundException::new));
+        } catch (IllegalArgumentException ex) {
+            log.error("Для поиска сайта задан пустой id.");
+            return null;
+        } catch (ChangeSetPersister.NotFoundException ex) {
+            log.error("Попытка найти сайт с несуществующим id (" + id + ").");
+            Site site = repository.findById(id).get();
+            log.info(site.toString());
             return null;
         }
     }
 
     @Override
     public Collection<SiteDto> getAll() {
-        return repository.findAll().stream().map(SiteCRUDServiceImpl::mapToDto).toList();
+        return repository.findAll().stream().map(SiteCRUDService::mapToDto).toList();
     }
 
     @Override
     public SiteDto create(SiteDto siteDto) {
-        Site site = new Site(siteDto.getUrl(), siteDto.getName());
-        return mapToDto(repository.save(site));
+        Site site = new Site(siteDto.getUrl(), siteDto.getName(), siteDto.getStatus(), siteDto.getStatusTime());
+        site = repository.saveAndFlush(site);
+        return mapToDto(site);
     }
 
     @Override
@@ -93,5 +97,24 @@ public class SiteCRUDServiceImpl implements CRUDService<SiteDto> {
     public ResponseEntity<?> deleteById(int id) {
         repository.deleteById(id);
         return ResponseEntity.noContent().build();
+    }
+
+    public Site findByUrl(String url) {
+        return repository.findByUrl(url);
+    }
+
+    public void setIndexedStatusById(int id, Date statusTime) {
+        repository.setIndexedStatusById(id, statusTime);
+    }
+    public void setFailedStatusById(int id, Date statusTime) {
+        repository.setFailedStatusById(id, statusTime);
+    }
+
+    public Optional<Collection<Site>> findByStatus(Status status) {
+        return repository.findByStatus(status);
+    }
+
+    public void updateStatusTime(int siteId) {
+        repository.updateStatusTime(siteId, new Date());
     }
 }

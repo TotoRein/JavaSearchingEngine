@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import searchengine.model.Site;
 
 @Data
 @Setter
@@ -27,5 +26,16 @@ public class PageDto {
     public PageDto(int siteId, String path) {
         this.siteId = siteId;
         this.path = path;
+    }
+
+    @Override
+    public String toString() {
+        return "PageDto{" +
+                "id=" + id +
+                ", siteId=" + siteId +
+                ", path='" + path + '\'' +
+                ", code=" + code +
+                ", content length='" + content.length() + '\'' +
+                '}';
     }
 }
