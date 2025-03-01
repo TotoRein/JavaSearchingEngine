@@ -186,9 +186,10 @@ public class SiteIndexer extends RecursiveTask<Integer> {
      * Получает на вход dto страницы, разбивает content на леммы, записывает их в lemma и frequency
      */
     public int generateIndexForPage(PageDto pageDto) {
-        String pageText = pageDto.getContent();
+        String pageText;
         LemmaFinder lemmaFinder;
         try {
+            pageText = pageDto.getContent();
             lemmaFinder = LemmaFinder.getInstance();
         } catch (IOException exception) {
             log.error(exception.getMessage());

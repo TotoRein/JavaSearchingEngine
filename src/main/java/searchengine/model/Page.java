@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "page", indexes = {@Index(columnList = "path"), @Index(columnList = "site_id, path", unique = true)})
+@Table(name = "`page`", indexes = {@Index(columnList = "path"), @Index(columnList = "site_id, path", unique = true)})
 @Getter
 @Setter
 @AllArgsConstructor

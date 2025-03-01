@@ -11,7 +11,7 @@ import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "site")
+@Table(name = "`site`")
 @Getter
 @Setter
 @AllArgsConstructor

@@ -13,7 +13,7 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQL8Dialect
     hibernate:
-      ddl-auto: validate #update #create #
+      ddl-auto: update # #create #validate
     show-sql: false #true #
 
 connection:
@@ -27,7 +27,7 @@ indexing-settings:
 #    - url: https://dnd.su/feats/
 #      name: Онлайн-справочник D&D 5 || Черты
 #    - url: https://dnd.fandom.com/ru/wiki/
-#      name: Планарную энциклопедию
+#      name: Планарная энциклопедия
 #    - url: https://ipfran.ru/
 #      name: Институт прикладной физики им. А.В. Гапонова-Грехова Российской академии наук
 
