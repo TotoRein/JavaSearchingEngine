@@ -33,7 +33,7 @@ public class SiteIndexer extends RecursiveTask<Integer> {
     private final LemmaCRUDService lemmaCRUDService;
     private final IndexCRUDService indexCRUDService;
 
-    public SiteIndexer(String url,
+    public  SiteIndexer(String url,
                        String root,
                        int rootSiteId,
                        PageCRUDService pageCRUDService,

@@ -15,7 +15,7 @@ import javax.persistence.*;
 @NoArgsConstructor
 public class Index {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @OneToOne

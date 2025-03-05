@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 public class Page {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -25,7 +25,7 @@ public class Page {
     /** По заданию это поле должно быть TEXT,
      * но SQL не может создавать индекс по слишком длинным полям.
      * Задать длину индекса через jpa не получилось, изменил на VARCHAR(255)
-     * Иногда возникают ошибки кодировки, в бд поменял на tf8bm4, для создания индекса сокращаю до 180 */
+     * Иногда возникают ошибки кодировки, в бд поменял на utf8bm4, для создания индекса сокращаю до 180 */
     @Column(nullable = false, columnDefinition = "VARCHAR(180)")
     private String path;
 

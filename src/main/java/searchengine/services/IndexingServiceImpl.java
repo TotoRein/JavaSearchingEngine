@@ -31,16 +31,16 @@ public class IndexingServiceImpl implements IndexingService {
     private final LemmaCRUDService lemmaCRUDService;
     private final IndexCRUDService indexCRUDService;
     private final SiteCRUDService siteCRUDService;
-    private final ForkJoinPool indexingThreadsPool = new ForkJoinPool();
+    private ForkJoinPool indexingThreadsPool = new ForkJoinPool();
 
     @Override
     public IndexingResponse startIndexing() {
-       /**
+       /*
          * Найти сайт
          * Если индексируется -> сообщение и конец
          * Если Индексирован / ошибка - удалить и начать индексацию
          * */
-       Integer result = 0;
+       indexingThreadsPool = new ForkJoinPool();
        for (searchengine.config.Site site : sitesList.getSites()) {
             /* Если есть в БД и... */
             Site currentSite = siteCRUDService.findByUrl(site.getUrl());
@@ -58,6 +58,7 @@ public class IndexingServiceImpl implements IndexingService {
             siteEntity.updateStatus(Status.INDEXING);
             SiteDto siteDto = siteCRUDService.create(SiteCRUDService.mapToDto(siteEntity));
             int siteId = siteDto.getId();
+
             new Thread(() -> indexingThreadsPool.invoke(new SiteIndexer(site.getUrl(),
                     site.getUrl(),
                     siteId,
@@ -104,7 +105,6 @@ public class IndexingServiceImpl implements IndexingService {
                     site = new Site(configSite.getUrl(), configSite.getName());
                     site.updateStatus(Status.INDEXED);
                     siteCRUDService.update(SiteCRUDService.mapToDto(site));
-
                 }
                 break;
             }
