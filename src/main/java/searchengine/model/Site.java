@@ -21,6 +21,7 @@ public class Site {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
+    @Column(name = "`status`")
     @Enumerated(EnumType.STRING)
     private Status status;
 
@@ -33,7 +34,7 @@ public class Site {
     @Column(nullable = false, columnDefinition = "VARCHAR(255)")
     private String url;
 
-    @Column(nullable = false, columnDefinition = "VARCHAR(255)")
+    @Column(name = "`name`", nullable = false, columnDefinition = "VARCHAR(255)")
     private String name;
 
     @OneToMany(mappedBy = "site", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

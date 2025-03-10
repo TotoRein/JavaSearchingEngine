@@ -80,4 +80,8 @@ public class LemmaCRUDService implements CRUDService<LemmaDto> {
     public List<LemmaDto> getLemmasListForSearching(List<String> lemmasList, int frequency) {
         return lemmaRepository.findByLemmasAndFrequency(lemmasList, frequency).stream().map(LemmaCRUDService::mapToDto).toList();
     }
+
+    public int getLemmasAmountBySiteId(int siteId) {
+        return lemmaRepository.countLemmasBySite(siteId);
+    }
 }

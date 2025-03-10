@@ -26,7 +26,7 @@ public class Page {
      * но SQL не может создавать индекс по слишком длинным полям.
      * Задать длину индекса через jpa не получилось, изменил на VARCHAR(255)
      * Иногда возникают ошибки кодировки, в бд поменял на utf8bm4, для создания индекса сокращаю до 180 */
-    @Column(nullable = false, columnDefinition = "VARCHAR(180)")
+    @Column(name = "`path`", nullable = false, columnDefinition = "VARCHAR(180)")
     private String path;
 
     @Column(nullable = false)

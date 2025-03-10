@@ -16,7 +16,7 @@ public interface IndexRepository extends JpaRepository<Index, Integer> {
     nativeQuery = true)
     List<Integer> findPageIdByLemmaId(int lemmaId);
 
-    @Query(value = "SELECT SUM(rank) FROM `index` WHERE page_id = ?1 AND lemma_id IN ?2",
+    @Query(value = "SELECT SUM(`rank`) FROM `index` WHERE page_id = ?1 AND lemma_id IN ?2",
     nativeQuery = true)
     float getAbsRelevanceByPageAndLemmas(int pageId, List<Integer> lemmaIds);
 }

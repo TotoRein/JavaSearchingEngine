@@ -26,7 +26,7 @@ public class Index {
     @JoinColumn(name = "lemma_id", nullable = false)
     private Lemma lemma;
 
-    @Column(nullable = false, columnDefinition = "FLOAT")
+    @Column(name = "`rank`", nullable = false, columnDefinition = "FLOAT")
     private double rank;
 
     public Index(Page page, Lemma lemma, double rank) {

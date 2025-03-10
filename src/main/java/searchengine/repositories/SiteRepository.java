@@ -17,12 +17,12 @@ public interface SiteRepository extends JpaRepository<Site, Integer> {
     Optional<Collection<Site>> findByStatus(Status status);
     @Modifying
     @Transactional
-    @Query("UPDATE Site SET status = 'FAILED', last_error = 'Индексация остановлена пользователем', status_time =?2 WHERE status = 'INDEXING' AND id = ?1")
+    @Query("UPDATE Site SET `status` = 'FAILED', last_error = 'Индексация остановлена пользователем', status_time =?2 WHERE `status` = 'INDEXING' AND id = ?1")
     void setFailedStatusById(int id, Date statusTime);
 
     @Modifying
     @Transactional
-    @Query("UPDATE Site SET status = 'INDEXED', status_time = ?2 WHERE id = ?1")
+    @Query("UPDATE Site SET `status` = 'INDEXED', status_time = ?2 WHERE id = ?1")
     void setIndexedStatusById(int id, Date statusTime);
     Site findByUrl(String url);
 

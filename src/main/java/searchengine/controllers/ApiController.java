@@ -18,11 +18,6 @@ public class ApiController {
     private final StatisticsService statisticsService;
     private final IndexingService indexingService;
     private final SearchService searchService;
-//
-//    public ApiController(StatisticsService statisticsService, IndexingService indexingService) {
-//        this.statisticsService = statisticsService;
-//        this.indexingService = indexingService;
-//    }
 
     @GetMapping("/statistics")
     public ResponseEntity<StatisticsResponse> statistics() {
