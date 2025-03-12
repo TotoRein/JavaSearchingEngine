@@ -93,6 +93,9 @@ public class IndexingServiceImpl implements IndexingService {
      * */
     @Override
     public IndexingResponse indexPage(String url) {
+        System.out.println("Страница для индексации: " + url);
+
+
         url = url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
 
         /* Проверяем есть ли сайт в конфиге и бд */
@@ -154,7 +157,7 @@ public class IndexingServiceImpl implements IndexingService {
             new PageDto(site.getId(),
                     pageUrl,
                     response.statusCode(),
-                    doc.body().html()
+                    doc.html()
             )
         );
 

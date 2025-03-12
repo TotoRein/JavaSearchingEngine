@@ -20,4 +20,8 @@ public class SiteDto {
     private String url;
     private String name;
     private List<PageDto> pages;
+
+    public SiteDto(String url) {
+        this.url = url;
+    }
 }

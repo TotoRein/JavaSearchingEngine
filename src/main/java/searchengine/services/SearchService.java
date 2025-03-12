@@ -41,6 +41,7 @@ public class SearchService {
             }
             searchSiteList.add(searchSite);
         }
+        System.out.println("Ищем на следующих сайтах: " + searchSiteList);
 
         /* Разбиваем поисковый запрос на леммы */
         try {
@@ -60,15 +61,13 @@ public class SearchService {
 
         /* Исключаем слишком популярные леммы */
         /* Коэффициент популярности, варьируется для обеспечения большей релевантности */
-        float relevanceCoefficient = 0.4F;
+        float relevanceCoefficient = 1.0F; //0.4F;
         List<LemmaDto> lemmaDtoList = lemmaCRUDService.getLemmasListForSearching(queryLemmaSet.stream().toList(), (int) (pagesAmount * relevanceCoefficient));
 
         /* Нет информативных лемм, пустой ответ */
         if (lemmaDtoList.isEmpty()) {
             return new SuccessSearchResponse(true, 0, new ArrayList<>());
         }
-        /* todo: udalit' proverku */
-        System.out.println(lemmaDtoList.stream().map(LemmaDto::getLemma).toList());
 
         /* По самой редкой лемме ищем страницы, повторяем для каждой леммы, на каждой итерации оставляем только пересечение множеств. */
         List<Integer> pagesIds = indexCRUDService.getPageIdByLemma(lemmaDtoList.get(0).getId());

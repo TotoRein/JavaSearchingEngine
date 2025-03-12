@@ -10,6 +10,8 @@ import searchengine.services.IndexingService;
 import searchengine.services.SearchService;
 import searchengine.services.StatisticsService;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api")
 @RequiredArgsConstructor
@@ -35,8 +37,8 @@ public class ApiController {
     }
 
     @PostMapping("/indexPage")
-    public IndexingResponse indexPage(@RequestBody String url) {
-        return indexingService.indexPage(url);
+    public IndexingResponse indexPage(@RequestParam Map<String, String> indexingObject) {
+        return indexingService.indexPage(indexingObject.get("url"));
     }
 
     @GetMapping("/search")

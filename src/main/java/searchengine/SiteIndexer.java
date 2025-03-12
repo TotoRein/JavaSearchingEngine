@@ -10,6 +10,8 @@ import org.jsoup.select.Elements;
 import searchengine.dto.index.IndexDto;
 import searchengine.dto.index.LemmaDto;
 import searchengine.dto.index.PageDto;
+import searchengine.dto.index.SiteDto;
+import searchengine.model.enums.Status;
 import searchengine.services.IndexCRUDService;
 import searchengine.services.LemmaCRUDService;
 import searchengine.services.PageCRUDService;
@@ -51,7 +53,14 @@ public class SiteIndexer extends RecursiveTask<Integer> {
 
     @Override
     protected Integer compute() {
+        /* Проверяем статус сайта */
+        SiteDto siteDto = siteCRUDService.getById(rootSiteId);
+        if (siteDto.getStatus() != Status.INDEXING) {
+            return 0;
+        }
+
         Integer quantity = 1;
+        /* Пауза между обращениями */
         try {
             int delay = (int) (200 + Math.random() * 200);
             Thread.sleep(delay);
