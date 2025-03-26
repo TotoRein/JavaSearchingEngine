@@ -58,6 +58,10 @@ public class SiteIndexer extends RecursiveTask<Integer> {
         if (siteDto.getStatus() != Status.INDEXING) {
             return 0;
         }
+        if (!isPageNotIndexed(rootSiteId, currentPageUrl)) {
+            return 0;
+        }
+        log.info("Начало работы с " + currentPageUrl);
 
         Integer quantity = 1;
         /* Пауза между обращениями */
@@ -85,18 +89,15 @@ public class SiteIndexer extends RecursiveTask<Integer> {
 
         /* Если пустой content, пропускаем страницу  */
         if (doc.data().isEmpty()) {
+            log.info("Пустой content! Окончание работы с " + currentPageUrl);
             return 0;
         }
-        PageDto pageDto;
-        if (isPageNotIndexed(rootSiteId, currentPageUrl)) {
-            pageDto = pageCRUDService.create(new PageDto(rootSiteId,
-                cutRootUrl(currentPageUrl),
-                response.statusCode(),
-                doc.html())
-            );
-        } else {
-            return 0;
-        }
+
+        PageDto pageDto = pageCRUDService.create(new PageDto(rootSiteId,
+            cutRootUrl(currentPageUrl),
+            response.statusCode(),
+            doc.html())
+        );
 
         /* Обновляем timestamp статуса */
         siteCRUDService.updateStatusTime(rootSiteId);
@@ -116,6 +117,12 @@ public class SiteIndexer extends RecursiveTask<Integer> {
         for (String href : hrefSet) {
             href = href.split("\\?")[0];
             href = href.endsWith("/") ? href.substring(0, href.length() - 1) : href;
+
+            /* обрезаем пагинацию, если есть */
+            if (href.contains(".html")) {
+                href = href.substring(0, href.lastIndexOf(".html") + 5);
+            }
+            /* обрезаем якоря */
             if (href.contains(rootSiteUrl) & !href.contains("#")) {
                 if (isPageNotIndexed(rootSiteId, href)) {
 
@@ -145,7 +152,9 @@ public class SiteIndexer extends RecursiveTask<Integer> {
         }
 
         /* Создаём индекс по странице */
+        log.info("Начало создания индекса страницы " + pageDto.getPath());
         generateIndexForPage(pageDto);
+        log.info("Индекс создан " + pageDto.getPath());
 
         for (SiteIndexer walker : walkers) {
             quantity += walker.join();
@@ -154,8 +163,12 @@ public class SiteIndexer extends RecursiveTask<Integer> {
         /* В корневом потоке сайта/страницы ждём завершения всех прочих потоков */
         if (currentPageUrl.equals(rootSiteUrl)) {
             log.info("Проиндексировано страниц: " + quantity);
-            siteCRUDService.setIndexedStatusById(rootSiteId, new Date());
+            /* Если индексация не остановлена пользователем, статус INDEXED */
+            if (siteCRUDService.getById(rootSiteId).getStatus() != Status.FAILED) {
+                siteCRUDService.setIndexedStatusById(rootSiteId, new Date());
+            }
         }
+        log.info("Окончание работы с " + currentPageUrl);
         return quantity;
     }
 

@@ -18,7 +18,7 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
     enabled: true
-    drop-first: false # #true
+    drop-first: true #false #
 
 connection:
   userAgent: "Mozilla/5.0 (Windows; U; WindowsNT 5.1; en-US; rv1.8.1.6) Gecko/20070725 Firefox/2.0.0.6"
@@ -26,12 +26,7 @@ connection:
 
 indexing-settings:
   sites:
-    - url: https://dnd.su/race/
-      name: Онлайн-справочник D&D 5 || Расы
-#    - url: https://dnd.su/feats/
-#      name: Онлайн-справочник D&D 5 || Черты
-#    - url: https://dnd.fandom.com/ru/wiki/
-#      name: Планарная энциклопедия
-#    - url: https://ipfran.ru/
-#      name: Институт прикладной физики им. А.В. Гапонова-Грехова Российской академии наук
-
+#    - url: https://dnd.su/race/
+#      name: Онлайн-справочник D&D 5 || Расы
+    - url: http://www.playback.ru/
+      name: Интернет-магазин Playback.ru

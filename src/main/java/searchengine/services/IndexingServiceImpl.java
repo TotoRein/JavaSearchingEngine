@@ -53,6 +53,8 @@ public class IndexingServiceImpl implements IndexingService {
                 siteCRUDService.deleteById(currentSite.getId());
             }
 
+            log.info("Сайт " + site.getUrl() + " взят в обработку");
+
             /* Создаём новый сайт */
             Site siteEntity = new Site(site.getUrl(), site.getName());
             siteEntity.updateStatus(Status.INDEXING);
@@ -73,6 +75,7 @@ public class IndexingServiceImpl implements IndexingService {
 
     @Override
     public ResponseEntity<?> stopIndexing() {
+        log.info("Остановка индексации");
         indexingThreadsPool.shutdown();
         try {
             Collection<Site> sites = siteCRUDService.findByStatus(Status.INDEXING).orElseThrow(ChangeSetPersister.NotFoundException::new);
@@ -93,7 +96,7 @@ public class IndexingServiceImpl implements IndexingService {
      * */
     @Override
     public IndexingResponse indexPage(String url) {
-        System.out.println("Страница для индексации: " + url);
+        log.info("Начало индексации отдельной страницы " + url);
 
 
         url = url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
@@ -162,12 +165,16 @@ public class IndexingServiceImpl implements IndexingService {
         );
 
         /* Создаёт индекс по странице */
+        log.info("Начало создания индекса страницы " + pageUrl);
         int result = generateIndexForPage(pageDto);
+        log.info("Индекс создан " + pageUrl);
         String responseMessage = switch (result) {
             case 0 -> "При создании индекса произошла ошибка";
             case 1 -> "Индекс успешно создан";
             default -> "";
         };
+
+        log.info("Отдельная страница проиндексирована " + pageUrl);
 
         return new IndexingResponse(true, responseMessage);
     }
