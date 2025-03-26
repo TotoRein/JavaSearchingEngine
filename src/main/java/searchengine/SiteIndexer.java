@@ -7,6 +7,7 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.http.HttpStatus;
 import searchengine.dto.index.IndexDto;
 import searchengine.dto.index.LemmaDto;
 import searchengine.dto.index.PageDto;
@@ -89,6 +90,11 @@ public class SiteIndexer extends RecursiveTask<Integer> {
 
         /* Если пустой content, пропускаем страницу  */
         if (doc.data().isEmpty()) {
+            pageCRUDService.create(new PageDto(rootSiteId,
+                cutRootUrl(currentPageUrl),
+                HttpStatus.NO_CONTENT.value(),
+                "")
+            );
             log.info("Пустой content! Окончание работы с " + currentPageUrl);
             return 0;
         }
@@ -127,7 +133,6 @@ public class SiteIndexer extends RecursiveTask<Integer> {
                 if (isPageNotIndexed(rootSiteId, href)) {
 
                     /* Проверка корректность ссылок */
-                    // Без бина не подтянуть значение из конфига, а бин создать нельзя
                     int maxPathLength = 255;
                     if (href.length() > maxPathLength) {
                         continue;
