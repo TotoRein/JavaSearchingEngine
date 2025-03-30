@@ -20,7 +20,7 @@ public class Lemma {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "site_id", nullable = false)
     private Site site;
 
@@ -29,6 +29,10 @@ public class Lemma {
 
     @Column(nullable = false)
     private int frequency;
+
+    @OneToMany(mappedBy = "lemma", /*cascade = CascadeType.ALL, */fetch = FetchType.LAZY)
+    private List<Index> indexList = new ArrayList<>();
+
 
     public Lemma(Site site, String lemma, int frequency) {
         this.site = site;
@@ -42,7 +46,4 @@ public class Lemma {
         this.lemma = lemma;
         this.frequency = frequency;
     }
-
-    @OneToMany(mappedBy = "lemma", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Index> indexList = new ArrayList<>();
 }

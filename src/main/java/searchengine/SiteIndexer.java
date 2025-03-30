@@ -105,6 +105,10 @@ public class SiteIndexer extends RecursiveTask<Integer> {
             doc.html())
         );
 
+        if (pageDto == null) {
+            return 0;
+        }
+
         /* Обновляем timestamp статуса */
         siteCRUDService.updateStatusTime(rootSiteId);
 
@@ -223,20 +227,20 @@ public class SiteIndexer extends RecursiveTask<Integer> {
             return 0;
         }
         Map<String, Integer> lemmasWithFrequencies = lemmaFinder.collectLemmas(pageText);
+        List<IndexDto> indexList = new ArrayList<>();
 
-        for (String lemmaKey : lemmasWithFrequencies.keySet()) {
-            LemmaDto lemmaDto;
-            if (lemmaCRUDService.isLemmaExist(lemmaKey)) {
-                lemmaDto = lemmaCRUDService.getByLemma(lemmaKey);
+        for (Map.Entry<String, Integer> lemma  : lemmasWithFrequencies.entrySet()) {
+            LemmaDto lemmaDto = lemmaCRUDService.getByLemma(lemma.getKey());
+            if (lemmaDto != null) {
                 lemmaDto.setFrequency(lemmaDto.getFrequency() + 1);
                 lemmaCRUDService.update(lemmaDto);
             } else {
-                lemmaDto = new LemmaDto(pageDto.getSiteId(), lemmaKey, 1);
+                lemmaDto = new LemmaDto(pageDto.getSiteId(), lemma.getKey(), 1);
                 lemmaDto = lemmaCRUDService.create(lemmaDto);
             }
-            IndexDto indexDto = new IndexDto(pageDto.getId(), lemmaDto.getId(), lemmasWithFrequencies.get(lemmaKey));
-            indexCRUDService.create(indexDto);
+            indexList.add(new IndexDto(pageDto.getId(), lemmaDto.getId(), lemma.getValue()));
         }
+        indexCRUDService.createAll(indexList);
         return 1;
     }
 }

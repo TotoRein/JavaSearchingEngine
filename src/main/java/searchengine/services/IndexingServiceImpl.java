@@ -148,7 +148,7 @@ public class IndexingServiceImpl implements IndexingService {
                     .execute();
             doc = response.parse();
         } catch (IOException e) {
-            log.error(e.getMessage());
+            log.error("Не получилось получить content! " + e.getMessage());
             return new IndexingResponse(false, "При соединении со страницей возникла ошибка.");
         }
 
@@ -188,15 +188,14 @@ public class IndexingServiceImpl implements IndexingService {
         try {
             lemmaFinder = LemmaFinder.getInstance();
         } catch (IOException exception) {
-            log.error(exception.getMessage());
+            log.error("Не получилось получить LemmaFinder! " + exception.getMessage());
             return 0;
         }
         Map<String, Integer> lemmasWithFrequencies = lemmaFinder.collectLemmas(pageText);
 
         for (String lemmaKey : lemmasWithFrequencies.keySet()) {
-            LemmaDto lemmaDto;
-            if (lemmaCRUDService.isLemmaExist(lemmaKey)) {
-                lemmaDto = lemmaCRUDService.getByLemma(lemmaKey);
+            LemmaDto lemmaDto = lemmaCRUDService.getByLemma(lemmaKey);
+            if (lemmaDto != null) {
                 lemmaDto.setFrequency(lemmaDto.getFrequency() + 1);
                 lemmaCRUDService.update(lemmaDto);
             } else {

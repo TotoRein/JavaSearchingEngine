@@ -68,10 +68,6 @@ public class LemmaCRUDService implements CRUDService<LemmaDto> {
         return new Lemma(lemmaDto.getId(), null, lemmaDto.getLemma(), lemmaDto.getFrequency());
     }
 
-    public boolean isLemmaExist(String lemma) {
-        return lemmaRepository.findByLemma(lemma).isPresent();
-    }
-
     public LemmaDto getByLemma(String lemma) {
         Optional<Lemma> lemmaEntity = lemmaRepository.findByLemma(lemma);
         return lemmaEntity.map(LemmaCRUDService::mapToDto).orElse(null);
