@@ -54,7 +54,7 @@ public class PageCRUDService implements CRUDService<PageDto> {
     }
 
     @Override
-    public PageDto create(PageDto pageDto) {
+    public synchronized PageDto create(PageDto pageDto) {
         Page page = mapToEntity(pageDto);
         page.setSite(SiteCRUDService.mapToEntity(siteCRUDService.getById(pageDto.getSiteId())));
         try {
