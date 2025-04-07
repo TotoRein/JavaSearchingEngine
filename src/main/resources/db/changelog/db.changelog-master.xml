@@ -95,7 +95,7 @@
                 newDataType="varchar(180)"
                 tableName="lemma"/>
 
-        <createIndex tableName="lemma" indexName="lemma_idx">
+        <createIndex tableName="lemma" indexName="lemma_idx" unique="true">
             <column name="lemma"/>
         </createIndex>
     </changeSet>

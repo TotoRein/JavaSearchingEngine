@@ -38,7 +38,7 @@ public class LemmaCRUDService implements CRUDService<LemmaDto> {
     }
 
     @Override
-    public LemmaDto create(LemmaDto lemmaDto) {
+    public synchronized LemmaDto create(LemmaDto lemmaDto) {
         Site site = SiteCRUDService.mapToEntity(siteCRUDService.getById(lemmaDto.getSiteId()));
         Lemma lemma = new Lemma(site, lemmaDto.getLemma(), lemmaDto.getFrequency());
         lemma = lemmaRepository.saveAndFlush(lemma);
@@ -46,7 +46,7 @@ public class LemmaCRUDService implements CRUDService<LemmaDto> {
     }
 
     @Override
-    public ResponseEntity<?> update(LemmaDto lemmaDto) {
+    public synchronized ResponseEntity<?> update(LemmaDto lemmaDto) {
         Lemma lemma = mapToEntity(lemmaDto);
         Site site = SiteCRUDService.mapToEntity(siteCRUDService.getById(lemmaDto.getSiteId()));
         lemma.setSite(site);
