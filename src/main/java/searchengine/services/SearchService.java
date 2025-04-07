@@ -41,7 +41,7 @@ public class SearchService {
             }
             searchSiteList.add(searchSite);
         }
-        System.out.println("Ищем на следующих сайтах: " + searchSiteList);
+        //System.out.println("Ищем на следующих сайтах: " + searchSiteList);
 
         /* Разбиваем поисковый запрос на леммы */
         try {
@@ -61,7 +61,7 @@ public class SearchService {
 
         /* Исключаем слишком популярные леммы */
         /* Коэффициент популярности, варьируется для обеспечения большей релевантности */
-        float relevanceCoefficient = 1.0F; //0.4F;
+        float relevanceCoefficient = 0.4F; //1.0F; //
         List<LemmaDto> lemmaDtoList = lemmaCRUDService.getLemmasListForSearching(queryLemmaSet.stream().toList(), (int) (pagesAmount * relevanceCoefficient));
 
         /* Нет информативных лемм, пустой ответ */
