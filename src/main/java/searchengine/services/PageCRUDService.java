@@ -61,8 +61,8 @@ public class PageCRUDService implements CRUDService<PageDto> {
             page = pageRepository.saveAndFlush(page);
             return mapToDto(page);
         } catch (Exception exception) {
-            log.error("Attempt to insert something wrong! Path: " + page.getPath() + "\n" +
-                    exception.getMessage() + pageDto);
+//            log.error("Attempt to insert something wrong! Path: " + page.getPath() + "\n" +
+//                    exception.getMessage() + pageDto);
             return null;
         }
     }

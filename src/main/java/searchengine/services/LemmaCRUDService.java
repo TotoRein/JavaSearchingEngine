@@ -41,7 +41,11 @@ public class LemmaCRUDService implements CRUDService<LemmaDto> {
     public synchronized LemmaDto create(LemmaDto lemmaDto) {
         Site site = SiteCRUDService.mapToEntity(siteCRUDService.getById(lemmaDto.getSiteId()));
         Lemma lemma = new Lemma(site, lemmaDto.getLemma(), lemmaDto.getFrequency());
-        lemma = lemmaRepository.saveAndFlush(lemma);
+        try {
+            lemma = lemmaRepository.saveAndFlush(lemma);
+        } catch (Exception e) {
+            return null;
+        }
         return mapToDto(lemma);
     }
 

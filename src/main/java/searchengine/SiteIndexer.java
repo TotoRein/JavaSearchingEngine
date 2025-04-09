@@ -238,6 +238,9 @@ public class SiteIndexer extends RecursiveTask<Integer> {
                 lemmaDto = new LemmaDto(pageDto.getSiteId(), lemma.getKey(), 1);
                 lemmaDto = lemmaCRUDService.create(lemmaDto);
             }
+            if (lemmaDto == null) {
+                continue;
+            }
             indexList.add(new IndexDto(pageDto.getId(), lemmaDto.getId(), lemma.getValue()));
         }
         indexCRUDService.createAll(indexList);
