@@ -98,7 +98,6 @@ public class IndexingServiceImpl implements IndexingService {
     public IndexingResponse indexPage(String url) {
         log.info("Начало индексации отдельной страницы " + url);
 
-
         url = url.endsWith("/") ? url.substring(0, url.length() - 1) : url;
 
         /* Проверяем есть ли сайт в конфиге и бд */
@@ -106,14 +105,15 @@ public class IndexingServiceImpl implements IndexingService {
         for (searchengine.config.Site configSite : sitesList.getSites()) {
             if (url.contains(configSite.getUrl())) {
                 site = siteCRUDService.findByUrl(configSite.getUrl());
-
                 if (site == null) {
                     site = new Site(configSite.getUrl(), configSite.getName());
                     site.updateStatus(Status.INDEXED);
-                    siteCRUDService.update(SiteCRUDService.mapToDto(site));
+                    siteCRUDService.create(SiteCRUDService.mapToDto(site));
                 }
                 break;
             }
+        }
+        if (site == null) {
             return new IndexingResponse(false, "Данная страница находится за пределами сайтов, указанных в конфигурационном файле");
         }
 

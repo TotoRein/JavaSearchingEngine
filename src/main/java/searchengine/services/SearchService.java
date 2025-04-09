@@ -41,7 +41,6 @@ public class SearchService {
             }
             searchSiteList.add(searchSite);
         }
-        //System.out.println("Ищем на следующих сайтах: " + searchSiteList);
 
         /* Разбиваем поисковый запрос на леммы */
         try {
@@ -58,10 +57,9 @@ public class SearchService {
             pageList.addAll(pageCRUDService.getPagesBySite(site.getId()));
         }
         int pagesAmount = pageList.size();
-
         /* Исключаем слишком популярные леммы */
         /* Коэффициент популярности, варьируется для обеспечения большей релевантности */
-        float relevanceCoefficient = 0.4F; //1.0F; //
+        float relevanceCoefficient = 1.0F; // //0.4F;
         List<LemmaDto> lemmaDtoList = lemmaCRUDService.getLemmasListForSearching(queryLemmaSet.stream().toList(), (int) (pagesAmount * relevanceCoefficient));
 
         /* Нет информативных лемм, пустой ответ */
@@ -70,11 +68,12 @@ public class SearchService {
         }
 
         /* По самой редкой лемме ищем страницы, повторяем для каждой леммы, на каждой итерации оставляем только пересечение множеств. */
-        List<Integer> pagesIds = indexCRUDService.getPageIdByLemma(lemmaDtoList.get(0).getId());
+        List<Integer> pagesIds = new ArrayList<>(pageList.stream().map(Page::getId).toList());
+
+        pagesIds.retainAll(indexCRUDService.getPageIdByLemma(lemmaDtoList.get(0).getId()));
         for (LemmaDto ldto : lemmaDtoList) {
             pagesIds.retainAll(indexCRUDService.getPageIdByLemma(ldto.getId()));
         }
-
         /* По запросу страниц не найдено */
         if (pagesIds.isEmpty()) {
             return new SuccessSearchResponse(true, 0, new ArrayList<>());

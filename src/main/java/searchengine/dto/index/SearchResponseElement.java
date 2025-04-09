@@ -10,10 +10,10 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class SearchResponseElement {
-    private String siteUrl;
+    private String site;
     private String siteName;
-    private String pageUri;
-    private String pageTitle;
+    private String uri;
+    private String title;
     private String snippet;
     private float relevance;
 }
