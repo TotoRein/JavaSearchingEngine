@@ -46,7 +46,6 @@ public class ApiController {
                               @RequestParam(defaultValue = "") String site,
                               @RequestParam(defaultValue = "0") Integer offset,
                               @RequestParam(defaultValue = "20") Integer limit) {
-
         return searchService.search(query, site, offset, limit);
     }
 }

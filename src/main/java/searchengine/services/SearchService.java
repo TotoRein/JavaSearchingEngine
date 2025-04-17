@@ -59,11 +59,12 @@ public class SearchService {
         int pagesAmount = pageList.size();
         /* Исключаем слишком популярные леммы */
         /* Коэффициент популярности, варьируется для обеспечения большей релевантности */
-        float relevanceCoefficient = 1.0F; // //0.4F;
+        float relevanceCoefficient = 0.4F; //1.0F; //
         List<LemmaDto> lemmaDtoList = lemmaCRUDService.getLemmasListForSearching(queryLemmaSet.stream().toList(), (int) (pagesAmount * relevanceCoefficient));
 
         /* Нет информативных лемм, пустой ответ */
         if (lemmaDtoList.isEmpty()) {
+            System.out.println("В запросе \"" + query + "\" нет информативных лемм.");
             return new SuccessSearchResponse(true, 0, new ArrayList<>());
         }
 
@@ -76,6 +77,7 @@ public class SearchService {
         }
         /* По запросу страниц не найдено */
         if (pagesIds.isEmpty()) {
+            System.out.println("По запросу \"" + query + "\" страниц не найдено.");
             return new SuccessSearchResponse(true, 0, new ArrayList<>());
         }
         List<Page> resultPages = pageCRUDService.getAllById(pagesIds);
@@ -84,11 +86,14 @@ public class SearchService {
         int resultsCount = resultPages.size();
         List<SearchResponseElement> foundData = new ArrayList<>();
         float maxRelevance = 0;
+
+        System.out.println("По запросу \"" + query + "\" рассматривается " + resultPages.size() + " страниц.");
         for (Page p : resultPages) {
             String pageTitle, snippet;
             try {
                 pageTitle = Jsoup.parse(p.getContent()).title();
-                snippet = Jsoup.parse(p.getContent()).select("p:contains(" + query + ")").first().text();
+//                snippet = Jsoup.parse(p.getContent()).select("p:contains(" + query + ")").first().text();
+                snippet = Jsoup.parse(p.getContent()).select("*:contains(" + query + ")").last().text();
                 snippet = snippet.replaceAll(query, "<b>" + query + "</b>");
             }
             catch (NullPointerException e) {
@@ -117,6 +122,7 @@ public class SearchService {
         for (SearchResponseElement element : foundData) {
             element.setRelevance(element.getRelevance() / maxRelevance);
         }
+
         return new SuccessSearchResponse(true, resultsCount, foundData);
     }
 }
