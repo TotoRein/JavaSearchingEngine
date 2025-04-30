@@ -1539,7 +1539,8 @@ var API = function(){
                     }
                     $searchResults.find('.SearchResult-amount').text(result.count);
                     var scroll = $(window).scrollTop();
-                    result.data.forEach(function(page){
+//                    result.data.forEach(function(page){
+                    result.data.slice(data.offset, data.offset + data.limit).forEach(function(page){
                         $content.append('<div class="SearchResult-block">' +
                             '<a href="' + page.site + page.uri +'" target="_blank" class="SearchResult-siteTitle">' +
                                 (!data.siteName ? page.siteName + ' - ': '') +
@@ -1552,14 +1553,17 @@ var API = function(){
                     });
                     $(window).scrollTop(scroll);
                     $searchResults.addClass('SearchResult_ACTIVE');
-                    if (result.count > data.offset + result.data.length) {
+                    //if (result.count > data.offset + result.data.length) {
+                    if (result.count > data.offset + data.limit) {
                         $('.SearchResult-footer').removeClass('SearchResult-footer_hide')
                         $('.SearchResult-footer button[data-send="search"]')
-                            .data('sendoffset', data.offset + result.data.length)
+                            //.data('sendoffset', data.offset + result.data.length)
+                            .data('sendoffset', data.offset + data.limit)
                             .data('searchquery', data.query)
                             .data('searchsite', data.site)
                             .data('sendlimit', data.limit);
-                        $('.SearchResult-remain').text('(' + (result.count - data.offset - result.data.length) + ')')
+                        //$('.SearchResult-remain').text('(' + (result.count - data.offset - result.data.length) + ')')
+                        $('.SearchResult-remain').text('(' + (result.count - data.offset - data.limit) + ')')
                     } else {
                         $('.SearchResult-footer').addClass('SearchResult-footer_hide')
                     }

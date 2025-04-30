@@ -1,0 +1,30 @@
+10:56:47.720 30.04.2025 - Starting Application using Java 21.0.2 on Computer with PID 7384 (C:\Users\Григорий\Desktop\Skillbox\JavaCoreCourse\JavaBaseProject\target\classes started by Grigoriy in C:\Users\Григорий\Desktop\Skillbox\JavaCoreCourse\JavaBaseProject) - [main] INFO  searchengine.Application
+10:56:47.725 30.04.2025 - No active profile set, falling back to 1 default profile: "default" - [main] INFO  searchengine.Application
+10:56:49.719 30.04.2025 - Bootstrapping Spring Data JPA repositories in DEFAULT mode. - [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate
+10:56:49.981 30.04.2025 - Finished Spring Data repository scanning in 219 ms. Found 4 JPA repository interfaces. - [main] INFO  o.s.d.r.c.RepositoryConfigurationDelegate
+10:56:51.609 30.04.2025 - Tomcat initialized with port(s): 8080 (http) - [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer
+10:56:51.639 30.04.2025 - Initializing ProtocolHandler ["http-nio-8080"] - [main] INFO  o.a.coyote.http11.Http11NioProtocol
+10:56:51.642 30.04.2025 - Starting service [Tomcat] - [main] INFO  o.a.catalina.core.StandardService
+10:56:51.642 30.04.2025 - Starting Servlet engine: [Apache Tomcat/9.0.64] - [main] INFO  o.a.catalina.core.StandardEngine
+10:56:51.920 30.04.2025 - Initializing Spring embedded WebApplicationContext - [main] INFO  o.a.c.c.C.[Tomcat].[localhost].[/]
+10:56:51.921 30.04.2025 - Root WebApplicationContext: initialization completed in 4044 ms - [main] INFO  o.s.b.w.s.c.ServletWebServerApplicationContext
+10:56:52.831 30.04.2025 - HikariPool-1 - Starting... - [main] INFO  com.zaxxer.hikari.HikariDataSource
+10:56:53.251 30.04.2025 - HikariPool-1 - Start completed. - [main] INFO  com.zaxxer.hikari.HikariDataSource
+10:56:53.907 30.04.2025 - Successfully acquired change log lock - [main] INFO  liquibase.lockservice
+10:56:54.781 30.04.2025 - Reading from search_engine.DATABASECHANGELOG - [main] INFO  liquibase.changelog
+10:56:54.925 30.04.2025 - Successfully released change log lock - [main] INFO  liquibase.lockservice
+10:56:55.272 30.04.2025 - HHH000412: Hibernate ORM core version 5.6.9.Final - [main] INFO  org.hibernate.Version
+10:56:55.716 30.04.2025 - HCANN000001: Hibernate Commons Annotations {5.1.2.Final} - [main] INFO  o.h.annotations.common.Version
+10:56:55.966 30.04.2025 - HHH000400: Using dialect: org.hibernate.dialect.MySQL8Dialect - [main] INFO  org.hibernate.dialect.Dialect
+10:56:57.283 30.04.2025 - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform] - [main] INFO  o.h.e.t.j.p.i.JtaPlatformInitiator
+10:56:57.298 30.04.2025 - Initialized JPA EntityManagerFactory for persistence unit 'default' - [main] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean
+10:56:59.135 30.04.2025 - Adding welcome page template: index - [main] INFO  o.s.b.a.w.s.WelcomePageHandlerMapping
+10:56:59.604 30.04.2025 - Starting ProtocolHandler ["http-nio-8080"] - [main] INFO  o.a.coyote.http11.Http11NioProtocol
+10:56:59.635 30.04.2025 - Tomcat started on port(s): 8080 (http) with context path '' - [main] INFO  o.s.b.w.e.tomcat.TomcatWebServer
+10:56:59.675 30.04.2025 - Started Application in 12.964 seconds (JVM running for 14.677) - [main] INFO  searchengine.Application
+10:57:03.740 30.04.2025 - Initializing Spring DispatcherServlet 'dispatcherServlet' - [http-nio-8080-exec-1] INFO  o.a.c.c.C.[Tomcat].[localhost].[/]
+10:57:03.740 30.04.2025 - Initializing Servlet 'dispatcherServlet' - [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet
+10:57:03.742 30.04.2025 - Completed initialization in 1 ms - [http-nio-8080-exec-1] INFO  o.s.web.servlet.DispatcherServlet
+10:57:44.519 30.04.2025 - Closing JPA EntityManagerFactory for persistence unit 'default' - [SpringApplicationShutdownHook] INFO  o.s.o.j.LocalContainerEntityManagerFactoryBean
+10:57:44.540 30.04.2025 - HikariPool-1 - Shutdown initiated... - [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource
+10:57:44.601 30.04.2025 - HikariPool-1 - Shutdown completed. - [SpringApplicationShutdownHook] INFO  com.zaxxer.hikari.HikariDataSource
